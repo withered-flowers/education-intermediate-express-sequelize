@@ -1,7 +1,7 @@
 'use strict';
 // 01.
-// Cara untuk melakukan fs.readFileSync + parse data dengan cepat
-let dummy = require('../data/dummy.json');
+// Jangan lupa fs karena kita mau baca json
+const fs = require('fs');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -10,6 +10,8 @@ module.exports = {
     // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
     // createdAt dan updatedAt
     // sehingga kita harus memasukkan data tersebut.
+
+    let dummy = JSON.parse(fs.readFileSync('./data/dummy.json', 'utf8'));
 
     dummy = dummy.map(elem => {
       // Jangan lupa dipetakan karena dalam tabel Identities dibutuhkan 

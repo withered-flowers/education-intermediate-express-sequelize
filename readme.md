@@ -50,15 +50,16 @@ Requirement dari aplikasi ini adalah:
 | address  | VARCHAR(255) | NOT NULL    |
 
 #### Tabel 2
-| Endpoint       | Description                            |
-| -------------- | -------------------------------------- |
-| GET /          | Menampilkan list semua `Identities`    |
-| GET /add       | Menampilkan form penambah `Identities` |
-| POST /add      | Menghandle form penambah `Identities`  |
-| -------------- | -------------------------------------- |
-| GET /edit/:id  | Menampilkan edit form `Identities`     |
-| POST /edit/:id | Menghandle edit form `Identities`      |
-| GET /del/:id   | Menghandle delete `Identities`         |
+| Endpoint           | Description                            |
+| ------------------ | -------------------------------------- |
+| GET /              | Menampilkan "hello world"              |
+| GET /ide           | Menampilkan form penambah `Identities` |
+| GET /ide/add       | Menampilkan form penambah `Identities` |
+| POST /ide/add      | Menghandle form penambah `Identities`  |
+| ------------------ | -------------------------------------- |
+| GET /ide/edit/:id  | Menampilkan edit form `Identities`     |
+| POST /ide/edit/:id | Menghandle edit form `Identities`      |
+| GET /ide/del/:id   | Menghandle delete `Identities`         |
 
 Jadi setelah melihat requirement seperti, apa sajakah yang harus kita lakukan?
 
@@ -112,7 +113,9 @@ sekaligus dengan menggunakan `sequelize`. Caranya adalah dengan:
   `npx sequelize-cli model:generate --name Identity --attributes \
    name:String,jobTitle:String,phone:String,address:String`
 * Setelah perintah di atas diketik, maka akan terbentuk sebuah file pada 
-  folder `models` dan sebuah file pada folder `migrations`
+  folder `models` dan sebuah file pada folder `migrations`, coba lihat file
+  pad `models` dan `migrations`  untuk mengetahui lebih lanjut bagaimaan kode
+   dibuat.
 * Selanjutnya, kita akan menjalankan perintah untuk membuat tabel ini dengan 
   menjalankan perintah `npx sequelize-cli db:migrate`
 * Setelah menjalankan perintah ini, maka dapat dilihat pada postgresql bahwa 
@@ -135,8 +138,8 @@ langkah-langkahnya adalah:
 ```javascript
 'use strict';
 // 01.
-// Cara untuk melakukan fs.readFileSync + parse data dengan cepat
-let dummy = require('../data/dummy.json');
+// Jangan lupa fs karena kita mau baca json
+const fs = require('fs');
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
@@ -145,6 +148,8 @@ module.exports = {
     // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
     // createdAt dan updatedAt
     // sehingga kita harus memasukkan data tersebut.
+
+    let dummy = JSON.parse(fs.readFileSync('./data/dummy.json', 'utf8'));
 
     dummy = dummy.map(elem => {
       // Jangan lupa dipetakan karena dalam tabel Identities dibutuhkan 
@@ -176,51 +181,290 @@ module.exports = {
 };
 ```
 
+### Langkah 5 - Membuat app.js, routes, dan Controller
+Sebelumnya, kita akan membuat sebuah folder bernama `controllers` terlebih
+dahulu dan membuat sebuah file `controllers/controller.js` yang masih kosong.
+
+Selanjutnya kita akan membuat app.js beserta routesnya terlebih dahulu.
+
+Pada file `app.js` kita akan menuliskan kode untuk:
+* Menjalankan express
+* Menggunakan view engine ejs
+* Menggunakan body-parser / express.urlencoded
+* Membuat router express mengarah ke `routes/index.js`
+
+Sehingga pada file `app.js`, akan terbentuk kode sebagai berikut
 ```javascript
-'use strict';
-// 01.
-// Cara untuk melakukan fs.readFileSync + parse data dengan cepat
-let dummy = require('../../b-end/data/dummy.json');
+const express = require('express');
+const app = express();
 
-module.exports = {
-  up: (queryInterface, Sequelize) => {
-    // 02.
-    // Di sini kita akan membaca filenya terlebih dahulu
-    // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
-    // createdAt dan updatedAt
-    // sehingga kita harus memasukkan data tersebut.
+const PORT = 3000;
 
-    dummy = dummy.map(elem => {
-      // Jangan lupa dipetakan karena dalam tabel Identities dibutuhkan 
-      // 2 tambahan kolom ini
-      elem.createdAt = new Date();
-      elem.updatedAt = new Date();
+// Jangan lupa import routes/index.js
+// Abaikan bila error pada saat pembuatan pertama
+const indexRoutes = require('./routes/index.js');
 
-      return elem;
-    })
+// set view engine
+app.set('view engine', 'ejs');
+// gunakan middleware bodyParser
+app.use(express.urlencoded({ extended: true }));
 
-    // 03. 
-    // Masukkan data ke dalam tabel Identities
-    // Kita gunakan 
-    // return queryInterface.bulkInsert('NamaTabel', arrayObj, opt)
-    return queryInterface.bulkInsert(
-      'Identities', 
-      dummy, 
-      {}
-    );
-  },
+// Menggunakan routes dari routes/index.js
+// Abaikan bila error pada saat pembuatan pertama karena file dan
+// folder belum terbentuk
+app.use('/', indexRoutes);
 
-  down: (queryInterface, Sequelize) => {
-    // Ceritanya, kalau ada up (kita melakukan)
-    // down (kita mereverse apa yang kita lakukan)
-    // Kita gunakan 
-    // return queryInterface.bulkDelete('NamaTabel', arrayObj, opt)
-    return queryInterface.bulkDelete('Identities', null, {});
-  }
-};
+// Jalankan express
+app.listen(PORT, () => {
+  console.log(`Aplikasi jalan di PORT ${PORT}`);
+})
 ```
 
-### Langkah 5 - Membuat app.js dan MVC
+Selanjutnya kita akan mendefinisikan routes dan seluruh endpoint yang ada, 
+hal ini akan kita definisikan dalam 2 file, yaitu:
+* `routes/identities.js` yang berisi semua yang berhubungan dengan resource
+  `ide/` dan
+* `routes/index.js` yang berisi penampung semuanya.
 
+Berdasarkan penjelasan di atas, maka selanjutnya adalah kita akan:
+* Membuat folder `routes`
+* Membuat file `routes/identities.js`
+* Membuat file `routes/index.js`
+
+Maka pada file `routes/identities.js`, kita juga akan mendefinisikan beberapa
+method yang dibutuhkan sebagai method `Controller` untuk setiap endpoint yang
+ada.
+
+```javascript
+const express = require('express');
+const router = express.Router();
+
+const Controller = require('../controllers/controller.js);
+
+// Semua router endpoint yang ada hub dengan /ide
+// ditaruh di sini
+router.get('/', Controller.getIdentityRootHandler);
+router.get('/add', Controller.getIdentityAddHandler);
+router.post('/add', Controller.postIdentityAddHandler);
+router.get('/edit/:id', Controller.getIdentityEditHandler);
+router.post('/edit/:id', Controller.postIdentityEditHandler);
+router.get('/del/:id', Controller.getIdentityDelHandler);
+
+module.exports = router;
+```
+
+Dicatat bahwa pada `routes/identities.js` ini akan memangil file 
+`controllers/controller.js` dan memiliki 6 method yang harus didefiniskan 
+nanti:
+* getIdentityRootHandler
+* getIdentityAddHandler
+* postIdentityAddHandler
+* getIdentityEditHandler
+* postIdentityEditHandler
+* getIdentityDelHandler
+
+Selanjutnya kita akan berpindah pada file `routes/index.js` dan mendefinisikan
+seluruh rute utama yang harus ada.
+
+Kode untuk `routes/index.js` adalah sebagai berikut:
+```javascript
+const express = require('express');
+const router = express.Router();
+
+const Controller = require('../controllers/controller.js');
+const identityRoutes = require('./identities.js');
+
+// Semua route akan dihandle oleh si index ini
+router.get('/', Controller.getRootHandler);
+router.use('/ide', identityRoutes);
+
+module.exports = router;
+```
+
+Dicatat lagi bahwa pada `routes/index.js` ini akan memanggil file 
+`controllers/controller.js` dan memiliki 1 method tambahan yang harus 
+didefiniskan nanti:
+* getRootHandler
+
+Sehingga total akan ada 7 method yang harus didefine pada 
+`controllers/controller.js`.
+
+Setelah semua rute didefinisikan dan `app.js` selesai dibuat, maka saatnya 
+kita berpindah ke bagian `otak` nya, yaitu `controllers.controller.js` dan
+mendefinisikan ke-7-method yang dibuat.
+
+Diingat bahwa karena kita sudah menggunakan `sequelize`, maka untuk bagian
+`models` sudah di-generate, kita tinggal menggunakannya saja !
+
+WARNING:  
+Untuk mempercepat proses pembelajaran, maka untuk `views` nya sudah 
+disediakan template dan sudah disebutkan variabel apa yang dibutuhkan.
+Diingat pada dunia nyata `views` ini harus dibuat sendiri yah !
+
+```javascript
+const { Identity } = require('../models/index.js');
+
+class Controller {
+  static getRootHandler(req, res) {
+    // Di sini kita akan me-render sebuah views bernama 
+    //`views/home.ejs`
+    
+    // view ini membutuhkan parameter
+    //    title, untuk menaruh judul
+    res.render('home', {
+      title: "Home"
+    });
+  }
+
+  static getIdentityRootHandler(req, res) {
+    // Di sini kita akan me-render sebuah views bernama
+    // views/ide-list.ejs
+
+    // view ini membutuhkan parameter
+    //    title, untuk menaruh judul
+    //    dataIdentities, untuk menaruh data yang didapat dari model
+    //      dalam bentuk tabel
+    Identity.findAll()
+      .then(data => {
+        res.render('ide-list', {
+          title: "Identity - List",
+          dataIdentities: data
+        })
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  }
+  
+  static getIdentityAddHandler(req, res) {
+    // Di sini kita akan me-render sebuah views bernama
+    // views/ide-add.ejs
+
+    // view ini membutuhkan parameter
+    //    title, untuk menaruh judul
+    res.render('ide-add', {
+      title: "Identity - Add"
+    });
+  }
+
+  static postIdentityAddHandler(req, res) {
+    // Di sini kita akan menerima inputan form dari 
+    // views/ide-add.ejs
+
+    // paramater yang diterima adalah
+    // req.body.acc_name
+    // req.body.acc_jobTitle
+    // req.body.acc_phone
+    // req.body.acc_address
+    const inputBody = req.body;
+
+    let objIdentity = {
+      name: inputBody.acc_name,
+      jobTitle: inputBody.acc_jobTitle,
+      phone: inputBody.acc_phone,
+      address: inputBody.acc_address
+    };
+
+    Identity.create(objIdentity)
+      .then(data => {
+        console.log(`Data with id ${data.id} has been added !`);
+        res.redirect('/ide');
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  }
+
+  static getIdentityEditHandler(req, res) {
+    // Di sini kita akan menerima inputan dari 
+    // parameter di endpoint dan 
+    // Kemudian akan melakukan pencarian spesifik dari tabel
+    // dan melemparkannya ke views/ide-edit.ejs
+
+    // view ini membutuhkan parameter
+    //    title, untuk menaruh judul
+    //    dataIdentity, untuk menerima data identitas dari 
+    //      hasil pencarian
+    const idInput = req.params.id;
+
+    Identity.findOne({
+      where: {
+        id: idInput
+      }
+    })
+      .then(data => {
+        res.render('ide-edit', {
+          title: "Identity - Edit",
+          dataIdentity: data
+        })
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  }
+
+  static postIdentityEditHandler(req, res) {
+    // Di sini kita akan menerima inputan dari 
+    // parameter di endpoint dan 
+    // form dari views/ide-edit.ejs
+
+    // paramater yang diterima adalah
+    // req.body.acc_name
+    // req.body.acc_jobTitle
+    // req.body.acc_phone
+    // req.body.acc_address
+    const inputBody = req.body;
+
+    let objIdentity = {
+      name: inputBody.acc_name,
+      jobTitle: inputBody.acc_jobTitle,
+      phone: inputBody.acc_phone,
+      address: inputBody.acc_address
+    };
+
+    Identity.update(objIdentity, {
+      where: {
+        id: req.params.id
+      }
+    })
+      .then(data => {
+        console.log(`Data with id ${data.id} has been updated !`);
+        res.redirect('/ide');
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  }
+
+  static getIdentityDelHandler(req, res) {
+    // Di sini kita akan menerima inputan dari 
+    // parameter di endpoint
+    Identity.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+      .then(data => {
+        console.log(`Data with id ${data.id} has been deleted !`);
+        res.redirect('/ide');
+      })
+      .catch(err => {
+        res.send(err);
+      });
+  }
+}
+
+module.exports = Controller;
+```
+
+Sampai di tahap ini, artinya aplikasi kita sudah selesai dan siap dijalankan.
+
+### Langkah 6 - Jalankan Aplikasi
+Mari kita jalankan aplikasi kita dengan mengetik `npx nodemon app.js`
+
+Selamat ! sampai di sini artinya kita sudah berhasil membuat aplikasi dengan
+menggunakan express dan sequelize dan sudah berhasil melakukan CRUD sederhana !
 
 ## References
+* [Sequelize Documentation](https://sequelize.org/v5/)
+* [Sequelize API Ref](https://sequelize.org/v5/identifiers.html)
