@@ -94,9 +94,8 @@ dengan cara:
     * `seeders`, yang digunakan untuk memasukkan data awal.
 * Mengedit file konfigurasi pada `config/config.json` dengan memasukkan 
   credential yang tepat, dan `dialect` yang diubah ke `postgres`
-* Setelah melakukan konfigurasi di atas, kita akan mencoba untuk membuat 
-  databasenya dengan melakukan `npx sequelize-cli db:create`, sehingga akan
-  mendapatkan output `Database development created.`
+* Setelah melakukan konfigurasi di atas, dengan menggunakan GUI / CLI untuk 
+  `postgresql` buatlah database dengan nama `development`. 
 
 ### Langkah 3 - Membuat tabel Identities
 Selanjutnya adalah kita akan membuat model `Identity` dengan tabel `Identities`
@@ -134,7 +133,94 @@ langkah-langkahnya adalah:
 
 #### Code 01
 ```javascript
+'use strict';
+// 01.
+// Cara untuk melakukan fs.readFileSync + parse data dengan cepat
+let dummy = require('../data/dummy.json');
 
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    // 02.
+    // Di sini kita akan membaca filenya terlebih dahulu
+    // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
+    // createdAt dan updatedAt
+    // sehingga kita harus memasukkan data tersebut.
+
+    dummy = dummy.map(elem => {
+      // Jangan lupa dipetakan karena dalam tabel Identities dibutuhkan 
+      // 2 tambahan kolom ini
+      elem.createdAt = new Date();
+      elem.updatedAt = new Date();
+
+      return elem;
+    })
+
+    // 03. 
+    // Masukkan data ke dalam tabel Identities
+    // Kita gunakan 
+    // return queryInterface.bulkInsert('NamaTabel', arrayObj, opt)
+    return queryInterface.bulkInsert(
+      'Identities', 
+      dummy, 
+      {}
+    );
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    // Ceritanya, kalau ada up (kita melakukan)
+    // down (kita mereverse apa yang kita lakukan)
+    // Kita gunakan 
+    // return queryInterface.bulkDelete('NamaTabel', arrayObj, opt)
+    return queryInterface.bulkDelete('Identities', null, {});
+  }
+};
 ```
+
+```javascript
+'use strict';
+// 01.
+// Cara untuk melakukan fs.readFileSync + parse data dengan cepat
+let dummy = require('../../b-end/data/dummy.json');
+
+module.exports = {
+  up: (queryInterface, Sequelize) => {
+    // 02.
+    // Di sini kita akan membaca filenya terlebih dahulu
+    // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
+    // createdAt dan updatedAt
+    // sehingga kita harus memasukkan data tersebut.
+
+    dummy = dummy.map(elem => {
+      // Jangan lupa dipetakan karena dalam tabel Identities dibutuhkan 
+      // 2 tambahan kolom ini
+      elem.createdAt = new Date();
+      elem.updatedAt = new Date();
+
+      return elem;
+    })
+
+    // 03. 
+    // Masukkan data ke dalam tabel Identities
+    // Kita gunakan 
+    // return queryInterface.bulkInsert('NamaTabel', arrayObj, opt)
+    return queryInterface.bulkInsert(
+      'Identities', 
+      dummy, 
+      {}
+    );
+  },
+
+  down: (queryInterface, Sequelize) => {
+    // Ceritanya, kalau ada up (kita melakukan)
+    // down (kita mereverse apa yang kita lakukan)
+    // Kita gunakan 
+    // return queryInterface.bulkDelete('NamaTabel', arrayObj, opt)
+    return queryInterface.bulkDelete('Identities', null, {});
+  }
+};
+```
+
+### Langkah 5 - Membuat app.js dan MVC
+
 
 ## References
