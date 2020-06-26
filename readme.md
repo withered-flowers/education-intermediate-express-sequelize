@@ -42,7 +42,7 @@ Requirement dari aplikasi ini adalah:
 
 #### Tabel 1
 | Kolom    | Tipe         | Deskripsi   |
-| -------- | ------------ | ----------- |
+|----------|--------------|-------------|
 | id       | SERIAL       | PRIMARY KEY |
 | name     | VARCHAR(255) | NOT NULL    |
 | jobTitle | VARCHAR(255) | NOT NULL    |
@@ -50,13 +50,12 @@ Requirement dari aplikasi ini adalah:
 | address  | VARCHAR(255) | NOT NULL    |
 
 #### Tabel 2
-| Endpoint           | Description                            |
-| ------------------ | -------------------------------------- |
+| Endpoint           | Deskripsi                              |
+|--------------------|----------------------------------------|
 | GET /              | Menampilkan "hello world"              |
 | GET /ide           | Menampilkan form penambah `Identities` |
 | GET /ide/add       | Menampilkan form penambah `Identities` |
 | POST /ide/add      | Menghandle form penambah `Identities`  |
-| ------------------ | -------------------------------------- |
 | GET /ide/edit/:id  | Menampilkan edit form `Identities`     |
 | POST /ide/edit/:id | Menghandle edit form `Identities`      |
 | GET /ide/del/:id   | Menghandle delete `Identities`         |
