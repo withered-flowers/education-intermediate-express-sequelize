@@ -41,6 +41,7 @@ Requirement dari aplikasi ini adalah:
   dilihat pada [Tabel 2](#tabel-2)
 
 #### Tabel 1
+
 | Kolom    | Tipe         | Deskripsi   |
 |----------|--------------|-------------|
 | id       | SERIAL       | PRIMARY KEY |
@@ -50,6 +51,7 @@ Requirement dari aplikasi ini adalah:
 | address  | VARCHAR(255) | NOT NULL    |
 
 #### Tabel 2
+
 | Endpoint           | Deskripsi                              |
 |--------------------|----------------------------------------|
 | GET /              | Menampilkan "hello world"              |
