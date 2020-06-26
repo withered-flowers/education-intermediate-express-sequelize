@@ -115,11 +115,42 @@ sekaligus dengan menggunakan `sequelize`. Caranya adalah dengan:
 * Setelah perintah di atas diketik, maka akan terbentuk sebuah file pada 
   folder `models` dan sebuah file pada folder `migrations`, coba lihat file
   pad `models` dan `migrations`  untuk mengetahui lebih lanjut bagaimaan kode
-   dibuat.
+  dibuat.
+* Dikarenakan kita di sini masih ingin menggunakan `promise` instead of
+  `async / await`, maka kita akan melakukan edit pada file `migrations` yang
+  baru dibuat oleh `sequelize`, contoh perubahan untuk mengubah `async / await`
+  menjadi `promise` dapat dilihat pada [Code 00](#code-00)
 * Selanjutnya, kita akan menjalankan perintah untuk membuat tabel ini dengan 
   menjalankan perintah `npx sequelize-cli db:migrate`
 * Setelah menjalankan perintah ini, maka dapat dilihat pada postgresql bahwa 
   tabel `Identities` sudah terbentuk.
+
+#### Code 00
+```javascript
+'use strict';
+module.exports = {
+  // Awalnya di sini ada async bukan ?
+  // kita akan mengubah nya dengan cara 
+  // membuang keyword async tersebut
+  up: (queryInterface, Sequelize) => {
+    // Kemudian di sini harusnya ada await bukan?
+    // kita akan mengganti keyword await tersebut
+    // menjadi return.
+    // Hal ini dapat terjadi karena 
+    // queryInterface.createTable sudah bersifat Promise.
+    return queryInterface.createTable('Identities', {
+      ...
+    });
+  },
+
+  // sama dengan yang ada di up tadi, 
+  // keyword asyncnya dibuang
+  // dan await nya diganti return.
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.dropTable('Identities');
+  }
+};
+```
 
 ### Langkah 4 - Membuat seeder
 Selanjutnya, setelah tabel terbentuk, kita akan memasukkan data yang kita
@@ -142,7 +173,7 @@ langkah-langkahnya adalah:
 const fs = require('fs');
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  up: (queryInterface, Sequelize) => {
     // 02.
     // Di sini kita akan membaca filenya terlebih dahulu
     // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
@@ -171,7 +202,7 @@ module.exports = {
     );
   },
 
-  down: async (queryInterface, Sequelize) => {
+  down: (queryInterface, Sequelize) => {
     // Ceritanya, kalau ada up (kita melakukan)
     // down (kita mereverse apa yang kita lakukan)
     // Kita gunakan 

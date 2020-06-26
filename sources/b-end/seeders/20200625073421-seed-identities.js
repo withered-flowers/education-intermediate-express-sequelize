@@ -4,7 +4,7 @@
 const fs = require('fs');
 
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
+  up: (queryInterface, Sequelize) => {
     // 02.
     // Di sini kita akan membaca filenya terlebih dahulu
     // Ingat bahwa pada sequelize semua tabel akan memiliki 2 kolom tambahan
@@ -33,7 +33,7 @@ module.exports = {
     );
   },
 
-  down: async (queryInterface, Sequelize) => {
+  down: (queryInterface, Sequelize) => {
     // Ceritanya, kalau ada up (kita melakukan)
     // down (kita mereverse apa yang kita lakukan)
     // Kita gunakan 

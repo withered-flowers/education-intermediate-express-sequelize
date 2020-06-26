@@ -1,7 +1,15 @@
 'use strict';
 module.exports = {
-  up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('Identities', {
+  // Awalnya di sini ada async bukan ?
+  // kita akan mengubah nya dengan cara 
+  // membuang keyword async tersebut
+  up: (queryInterface, Sequelize) => {
+    // Kemudian di sini harusnya ada await bukan?
+    // kita akan mengganti keyword await tersebut
+    // menjadi return.
+    // Hal ini dapat terjadi karena 
+    // queryInterface.createTable sudah bersifat Promise.
+    return queryInterface.createTable('Identities', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -30,7 +38,11 @@ module.exports = {
       }
     });
   },
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('Identities');
+
+  // sama dengan yang ada di up tadi, 
+  // keyword asyncnya dibuang
+  // dan await nya diganti return.
+  down: (queryInterface, Sequelize) => {
+    return queryInterface.dropTable('Identities');
   }
 };
